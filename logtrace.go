@@ -122,7 +122,7 @@ func (hook LogtraceHook) retrieveProgramCounters(err error) []uintptr {
 func (hook LogtraceHook) retrieveStackFrames(err error) []StackFrame {
 	pcs := hook.retrieveProgramCounters(err)
 
-	if pcs == nil || len(pcs) == 0 {
+	if len(pcs) == 0 {
 		return []StackFrame{}
 	}
 
