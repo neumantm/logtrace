@@ -1,5 +1,8 @@
 # logtrace
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/neumantm/logtrace.svg)](https://pkg.go.dev/github.com/neumantm/logtrace)
+[![CI](https://github.com/neumantm/logtrace/actions/workflows/ci.yml/badge.svg)](https://github.com/neumantm/logtrace/actions/workflows/ci.yml)
+
 Logrus hook for attaching an error traceback to a log entry
 
 This project is a hook for the golang logging libary [logrus](https://github.com/sirupsen/logrus).
