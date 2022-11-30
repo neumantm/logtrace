@@ -66,7 +66,7 @@ func setupErrorTracebackHookTest() (validationFormatter, *logrus.Logger) {
 	return formatter, testLogger
 }
 
-func captureStderr(f func()) string {
+func captureStderr(f func()) (error, string) {
 	orig := os.Stderr
 	r, w, _ := os.Pipe()
 	os.Stderr = w
@@ -75,10 +75,11 @@ func captureStderr(f func()) string {
 
 	var buf bytes.Buffer
 	w.Close()
-	io.Copy(&buf, r)
 	os.Stderr = orig
 
-	return buf.String()
+	_, err := io.Copy(&buf, r)
+
+	return err, buf.String()
 }
 
 func TestErrorTracebackHook(t *testing.T) {
@@ -101,7 +102,10 @@ func TestErrorTracebackHook(t *testing.T) {
 			formatter, testLogger := setupErrorTracebackHookTest()
 			testLogger.AddHook(tc.hook)
 
-			stderr := captureStderr(func() { testLogger.WithError(tc.err).Info("") })
+			err, stderr := captureStderr(func() { testLogger.WithError(tc.err).Info("") })
+			if err != nil {
+				t.Fatal("Failed to capture stderr. Please run test again.")
+			}
 			test.Eq(t, tc.expectedStderr, stderr)
 
 			if val, ok := (*formatter.Data)[logrus.ErrorKey]; ok {
@@ -120,6 +124,9 @@ func TestErrorTracebackHookNonErrorError(t *testing.T) {
 	_, testLogger := setupErrorTracebackHookTest()
 	testLogger.AddHook(testHook(false))
 
-	stderr := captureStderr(func() { testLogger.WithField(logrus.ErrorKey, "foo").Info("") })
+	err, stderr := captureStderr(func() { testLogger.WithField(logrus.ErrorKey, "foo").Info("") })
+	if err != nil {
+		t.Fatal("Failed to capture stderr. Please run test again.")
+	}
 	test.Eq(t, "Failed to fire hook: The value in the error field of the given logrus entry is not an error!\n", stderr)
 }
